@@ -10,13 +10,13 @@ class NotesHandler {
     this.deleteNoteByIdHandler = this.deleteNoteByIdHandler.bind(this);
   }
 
-  postNoteHandler(request, h) {
+  async postNoteHandler(request, h) {
     this._validator.validateNotePayload(request.payload);
-    const { title = "undefined", body, tags } = request.payload;
-    const noteId = this._service.addNote({ title, body, tags });
+    const { title = 'undefined', body, tags } = request.payload;
+    const noteId = await this._service.addNote({ title, body, tags });
     const response = h.response({
-      status: "success",
-      message: "Catatan berhasil ditambahkan",
+      status: 'success',
+      message: 'Catatan berhasil ditambahkan',
       data: {
         noteId: noteId,
       },
@@ -25,44 +25,44 @@ class NotesHandler {
     return response;
   }
 
-  getNotesHandler() {
-    const notes = this._service.getNotes();
+  async getNotesHandler() {
+    const notes = await this._service.getNotes();
     return {
-      status: "success",
+      status: 'success',
       data: {
         notes,
       },
     };
   }
 
-  getNoteByIdHandler(request) {
+  async getNoteByIdHandler(request) {
     const { id } = request.params;
-    const note = this._service.getNoteById(id);
+    const note = await this._service.getNoteById(id);
 
     return {
-      status: "success",
+      status: 'success',
       data: {
         note,
       },
     };
   }
 
-  putNoteByIdHandler(request) {
+  async putNoteByIdHandler(request) {
     this._validator.validateNotePayload(request.payload);
     const { id } = request.params;
-    this._service.editNoteById(id, request.payload);
+    await this._service.editNoteById(id, request.payload);
     return {
-      status: "success",
-      message: "Catatan berhasil diperbarui",
+      status: 'success',
+      message: 'Catatan berhasil diperbarui',
     };
   }
 
-  deleteNoteByIdHandler(request, h) {
+  async deleteNoteByIdHandler(request, h) {
     const { id } = request.params;
-    this._service.deleteNoteById(id);
+    await this._service.deleteNoteById(id);
     const response = h.response({
-      status: "success",
-      message: "Catatan berhasil dihapus",
+      status: 'success',
+      message: 'Catatan berhasil dihapus',
     });
     response.code(200);
     return response;
@@ -71,7 +71,7 @@ class NotesHandler {
 
 module.exports = NotesHandler;
 
-// const ClientError = require("../../exceptions/ClientError");
+// const ClientError = require('../../exceptions/ClientError');
 
 // class NotesHandler {
 //   constructor(service, validator) {
@@ -88,11 +88,11 @@ module.exports = NotesHandler;
 //   postNoteHandler(request, h) {
 //     try {
 //       this._validator.validateNotePayload(request.payload);
-//       const { title = "undefined", body, tags } = request.payload;
+//       const { title = 'undefined', body, tags } = request.payload;
 //       const noteId = this._service.addNote({ title, body, tags });
 //       const response = h.response({
-//         status: "success",
-//         message: "Catatan berhasil ditambahkan",
+//         status: 'success',
+//         message: 'Catatan berhasil ditambahkan',
 //         data: {
 //           noteId: noteId,
 //         },
@@ -102,7 +102,7 @@ module.exports = NotesHandler;
 //     } catch (error) {
 //       if (error instanceof ClientError) {
 //         const response = h.response({
-//           status: "fail",
+//           status: 'fail',
 //           message: error.message,
 //         });
 
@@ -111,8 +111,8 @@ module.exports = NotesHandler;
 //       }
 
 //       const response = h.response({
-//         status: "error",
-//         message: "Maaf, terjadi kegagalan pada server kami.",
+//         status: 'error',
+//         message: 'Maaf, terjadi kegagalan pada server kami.',
 //       });
 //       response.code(500);
 //       console.error(error);
@@ -123,7 +123,7 @@ module.exports = NotesHandler;
 //   getNotesHandler() {
 //     const notes = this._service.getNotes();
 //     return {
-//       status: "success",
+//       status: 'success',
 //       data: {
 //         notes,
 //       },
@@ -136,7 +136,7 @@ module.exports = NotesHandler;
 //       const note = this._service.getNoteById(id);
 
 //       return {
-//         status: "success",
+//         status: 'success',
 //         data: {
 //           note,
 //         },
@@ -144,7 +144,7 @@ module.exports = NotesHandler;
 //     } catch (error) {
 //       if (error instanceof ClientError) {
 //         const response = h.response({
-//           status: "fail",
+//           status: 'fail',
 //           message: error.message,
 //         });
 
@@ -153,8 +153,8 @@ module.exports = NotesHandler;
 //       }
 
 //       const response = h.response({
-//         status: "error",
-//         message: "Maaf, terjadi kegagalan pada server kami.",
+//         status: 'error',
+//         message: 'Maaf, terjadi kegagalan pada server kami.',
 //       });
 //       response.code(500);
 //       console.error(error);
@@ -168,13 +168,13 @@ module.exports = NotesHandler;
 //       const { id } = request.params;
 //       this._service.editNoteById(id, request.payload);
 //       return {
-//         status: "success",
-//         message: "Catatan berhasil diperbarui",
+//         status: 'success',
+//         message: 'Catatan berhasil diperbarui',
 //       };
 //     } catch (error) {
 //       if (error instanceof ClientError) {
 //         const response = h.response({
-//           status: "fail",
+//           status: 'fail',
 //           message: error.message,
 //         });
 
@@ -183,8 +183,8 @@ module.exports = NotesHandler;
 //       }
 
 //       const response = h.response({
-//         status: "error",
-//         message: "Maaf, terjadi kegagalan pada server kami.",
+//         status: 'error',
+//         message: 'Maaf, terjadi kegagalan pada server kami.',
 //       });
 //       response.code(500);
 //       console.error(error);
@@ -197,15 +197,15 @@ module.exports = NotesHandler;
 //       const { id } = request.params;
 //       this._service.deleteNoteById(id);
 //       const response = h.response({
-//         status: "success",
-//         message: "Catatan berhasil dihapus",
+//         status: 'success',
+//         message: 'Catatan berhasil dihapus',
 //       });
 //       response.code(200);
 //       return response;
 //     } catch (error) {
 //       if (error instanceof ClientError) {
 //         const response = h.response({
-//           status: "fail",
+//           status: 'fail',
 //           message: error.message,
 //         });
 
@@ -214,8 +214,8 @@ module.exports = NotesHandler;
 //       }
 
 //       const response = h.response({
-//         status: "error",
-//         message: "Maaf, terjadi kegagalan pada server kami.",
+//         status: 'error',
+//         message: 'Maaf, terjadi kegagalan pada server kami.',
 //       });
 //       response.code(500);
 //       console.error(error);
