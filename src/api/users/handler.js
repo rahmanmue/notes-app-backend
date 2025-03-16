@@ -4,6 +4,19 @@ class UsersHandler {
     this._validator = validator;
   }
 
+  async getUsersByUsernameHandler(request, h) {
+    const { username = '' } = request.query;
+    const users = await this._service.getUsersByUsername(username);
+    const response = h.response({
+      status: 'success',
+      data: {
+        users,
+      },
+    });
+    response.code(200);
+    return response;
+  }
+
   async postUserHandler(request, h) {
     this._validator.validateUserPayload(request.payload);
     const { username, password, fullname } = request.payload;
@@ -30,7 +43,6 @@ class UsersHandler {
 
     const response = h.response({
       status: 'success',
-
       data: {
         user,
       },
