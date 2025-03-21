@@ -8,7 +8,7 @@ exports.up = (pgm) => {
       primaryKey: true,
     },
     // eslint-disable-next-line camelcase
-    note_id: {
+    playlist_id: {
       type: 'VARCHAR(50)',
       notNull: true,
     },
@@ -19,22 +19,18 @@ exports.up = (pgm) => {
     },
   });
 
-  /*
-    Menambahkan constraint UNIQUE, kombinasi dari kolom note_id dan user_id.
-    Guna menghindari duplikasi data antara nilai keduanya.
-  */
   pgm.addConstraint(
     'collaborations',
-    'unique_note_id_and_user_id',
-    'UNIQUE(note_id, user_id)',
+    'unique_playlist_id_and_user_id',
+    'UNIQUE(playlist_id, user_id)',
   );
 
-  // memberikan constraint foreign key pada kolom note_id dan user_id terhadap notes.id dan users.id
   pgm.addConstraint(
     'collaborations',
-    'fk_collaborations.note_id_notes.id',
-    'FOREIGN KEY(note_id) REFERENCES notes(id) ON DELETE CASCADE',
+    'fk_collaborations.playlist_id_playlists.id',
+    'FOREIGN KEY(playlist_id) REFERENCES playlists(id) ON DELETE CASCADE',
   );
+
   pgm.addConstraint(
     'collaborations',
     'fk_collaborations.user_id_users.id',
