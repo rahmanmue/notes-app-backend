@@ -2,6 +2,9 @@ require('dotenv').config();
 const Hapi = require('@hapi/hapi');
 const ClientError = require('./exceptions/ClientError');
 const Jwt = require('@hapi/jwt');
+const Inert = require('@hapi/inert');
+const fs = require('fs');
+const path = require('path');
 
 //notes
 const notes = require('./api/notes');
@@ -29,11 +32,19 @@ const _exports = require('./api/exports');
 const ProducerService = require('./services/rabbitmq/ProducerService');
 const ExportsValidator = require('./validator/exports');
 
+// uploads
+const uploads = require('./api/uploads');
+const StorageService = require('./services/storage/StorageService');
+const UploadsValidator = require('./validator/uploads');
+
 const init = async () => {
   const collaborationsService = new CollaborationsService();
   const notesService = new NotesService(collaborationsService);
   const usersService = new UsersService();
   const authenticationsService = new AuthenticationsService();
+  const storageService = new StorageService(
+    path.resolve(__dirname, 'api/uploads/file/images'),
+  );
 
   const server = Hapi.server({
     port: process.env.PORT,
@@ -45,9 +56,56 @@ const init = async () => {
     },
   });
 
+  server.route({
+    method: 'POST',
+    path: '/uploads',
+    handler: async (request) => {
+      const { data } = request.payload;
+      console.log(data);
+
+      // menentukan nama dan folder berkas
+      const filename = data.hapi.filename;
+      const directory = path.resolve(__dirname, 'uploads');
+      if (!fs.existsSync(directory)) {
+        fs.mkdirSync(directory); // membuat folder bila belum ada
+      }
+
+      // membuat writable stream
+      const location = `${directory}/${filename}`;
+      const fileStream = fs.createWriteStream(location);
+
+      try {
+        const result = await new Promise((resolve, reject) => {
+          // mengembalikan Promise.reject ketika terjadi eror
+          fileStream.on('error', (error) => reject(error));
+          // membaca Readable (data) dan menulis ke Writable (fileStream)
+          data.pipe(fileStream);
+          // setelah selesai membaca Readable (data) maka mengembalikan nama berkas.
+          data.on('end', () => resolve(filename));
+        });
+
+        return { message: `Berkas ${result} berhasil diproses!` };
+      } catch (error) {
+        console.log(error);
+        return { message: 'Berkas gagal diproses' };
+      }
+    },
+    options: {
+      payload: {
+        allow: 'multipart/form-data',
+        multipart: true,
+        output: 'stream',
+        maxBytes: 500000, // 500KB
+      },
+    },
+  });
+
   await server.register([
     {
       plugin: Jwt,
+    },
+    {
+      plugin: Inert,
     },
   ]);
 
@@ -105,6 +163,13 @@ const init = async () => {
       options: {
         service: ProducerService,
         validator: ExportsValidator,
+      },
+    },
+    {
+      plugin: uploads,
+      options: {
+        service: storageService,
+        validator: UploadsValidator,
       },
     },
   ]);

@@ -3,3 +3,4 @@ rahman_dicoding_credentials.csv
 notes-api-webserver.pem
 .env
 .prod.env
+src/api/uploads/file
